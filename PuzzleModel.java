@@ -1,6 +1,9 @@
 import java.awt.*;
 import java.util.*;
 
+//the variable _contents contains the board face
+//and updates after every move 
+
 class PuzzleModel {
     private static final int ROWS = 3;
     private static final int COLS = 3;
@@ -15,27 +18,15 @@ class PuzzleModel {
         this.tempBoard = board;
         _contents = new Tile[ROWS][COLS];
         reset();
-        fillGoalState();
     }
     
     String getFace(int row, int col) {
         return _contents[row][col].getFace();
     }
-    
-    public void fillGoalState(){
-        _goalState[0][0] = new Tile(0,0, "1");
-        _goalState[0][1] = new Tile(0,1, "2");
-        _goalState[0][2] = new Tile(0,2, "3");
-        _goalState[1][0] = new Tile(1,0, "4");
-        _goalState[1][1] = new Tile(1,1, "5");
-        _goalState[1][2] = new Tile(1,2, "6");
-        _goalState[2][0] = new Tile(2,0, "7");
-        _goalState[2][1] = new Tile(2,1, "8");
-        _goalState[2][2] = new Tile(2,2, null);
-    }
 
     //initializes the tiles of the games
     //bases the faces from the input file
+    //puts it into _contents
     public void reset() {
         for (int r=0; r<ROWS; r++) {
             for (int c=0; c<COLS; c++) {
@@ -94,13 +85,11 @@ class PuzzleModel {
         }
 
         //this counts the inversions
-        for(int i=0;i<temp.length;i++){
-            int counter = i + 1;
-            while(counter < temp.length){
-                if(temp[i] > temp[counter]){
+        for(int i=0;i<temp.length-1;i++){
+            for(int j=i+1;j<temp.length;j++){
+                if(Integer.parseInt(String.valueOf(temp[i])) > Integer.parseInt(String.valueOf(temp[j])) && Integer.parseInt(String.valueOf(temp[i])) != 0 && Integer.parseInt(String.valueOf(temp[j])) != 0){
                     inv_count++;
                 }
-                counter++;
             }
         }
 
@@ -114,14 +103,28 @@ class PuzzleModel {
         return(invCount % 2 == 0);
     }
 
+    //this functions checks the board's inversion after every click
     public boolean isGameOver() {
-        for (int r=0; r<ROWS; r++) {
-            for (int c=0; c<ROWS; c++) {
-                Tile trc = _contents[r][c];
-                return trc.isInFinalPosition(r, c);
+        char[][] temp = new char[3][3];
+
+        //this puts updated puzzle face into an array to check inversions again
+        for(int i=0;i<temp.length;i++){
+            for(int j=0;j<temp.length;j++){
+                String s = _contents[i][j].getFace();              
+                if(s == null){
+                    temp[i][j] = '0';
+                }else{
+                    temp[i][j] = s.charAt(0);
+                }
+
             }
         }
-        return true;
+
+        if(getInvCount(temp) == 0){
+            return true;
+        }else{
+            return false;
+        }
     }
 
 }

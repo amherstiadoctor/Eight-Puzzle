@@ -2,45 +2,38 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.event.*;
+import java.util.*;
 
-class PuzzleGUI extends JPanel {
-    private GraphicsPanel    _puzzleGraphics;
+class PuzzleGUI extends JPanel implements MouseListener{
     public static char[][] tempBoard = new char[3][3];
+    private PuzzleModel _puzzleModel;
+    private JPanel controlPanel;
+    private static final int ROWS = 3;
+    private static final int COLS = 3;
+    
+    private static final int CELL_SIZE = 120;
+    private Font _biggerFont;
 
     public PuzzleGUI(char[][] board) {
         this.tempBoard = board;
-        JPanel controlPanel = new JPanel();
+        this.controlPanel = new JPanel();
         controlPanel.setLayout(new FlowLayout());
-
-        _puzzleGraphics = new GraphicsPanel(board);
 
         this.setLayout(new BorderLayout());
         this.add(controlPanel, BorderLayout.NORTH);
-        this.add(_puzzleGraphics, BorderLayout.CENTER);
+
+
+        _biggerFont = new Font("SansSerif", Font.BOLD, CELL_SIZE/2);
+        this.setPreferredSize(
+               new Dimension(CELL_SIZE*COLS, CELL_SIZE*ROWS));
+        this.setBackground(Color.white);
+        this.addMouseListener(this);
+
+        checkSolvability(board);
+
+        _puzzleModel = new PuzzleModel(board);
     }
 
-    //this class is in this class so as to use the instance variables in the outer class
-    class GraphicsPanel extends JPanel implements MouseListener {
-        private PuzzleModel _puzzleModel;
-
-        private static final int ROWS = 3;
-        private static final int COLS = 3;
-        
-        private static final int CELL_SIZE = 120;
-        private Font _biggerFont;
-
-        public GraphicsPanel(char[][] board) {
-            _biggerFont = new Font("SansSerif", Font.BOLD, CELL_SIZE/2);
-            this.setPreferredSize(
-                   new Dimension(CELL_SIZE * COLS, CELL_SIZE*ROWS));
-            this.setBackground(Color.white);
-            this.addMouseListener(this);
-
-            checkSolvability(board);
-
-            _puzzleModel = new PuzzleModel(board);
-        }
-        
         public void paintComponent(Graphics g) {
             super.paintComponent(g);
             for (int r=0; r<ROWS; r++) {
@@ -69,6 +62,8 @@ class PuzzleGUI extends JPanel {
             }
 
             this.repaint();
+
+            checkOver();
         }
 
         public void checkSolvability(char[][] board){
@@ -82,7 +77,11 @@ class PuzzleGUI extends JPanel {
 
         public void checkOver(){
             if(_puzzleModel.isGameOver()) {
-                System.exit(0);
+                int input = JOptionPane.showConfirmDialog(controlPanel, "SOLVED", "WINNER", JOptionPane.DEFAULT_OPTION);
+
+                if(input == 0){
+                    System.exit(0);
+                }
             }
         }
 
@@ -91,7 +90,4 @@ class PuzzleGUI extends JPanel {
         public void mouseReleased(MouseEvent e) {}
         public void mouseEntered (MouseEvent e) {}
         public void mouseExited  (MouseEvent e) {}
-    }
-    
-
 }
